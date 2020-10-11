@@ -23,9 +23,8 @@ the downloading of data to SpiNNaker and the collection of results.
 Acknowledgments
 ---------------
 
-Ongoing development of the SpiNNaker Project has been supported by
-the EU ICT Flagship Human Brain Project under Grants FP7-604102, H2020-720270,
-H2020-785907 and H2020-945539.
+Ongoing development of the SpiNNaker Project is supported by
+the EU ICT Flagship Human Brain Project under Grant H2020-945539.
 LA Plana is supported by the RAIN Hub, which is
 funded by the Industrial Strategy Challenge Fund, part of the government’s
 modern Industrial Strategy. The fund is delivered by UK Research and
