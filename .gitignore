@@ -31,6 +31,5 @@
 **/modified_src/
 **/reports/
 __pycache__
-/SpiNNaker_PDP2.egg-info/
 /dist/
 /doc/build
