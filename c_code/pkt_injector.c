@@ -58,6 +58,7 @@ typedef struct injector_conf {
   uint32_t active_time;      // length of time for packet injection
   uint32_t delayed_start;    // delay the start of packet injection
   uint32_t idle_end;         // idle time after packet injection stops
+  uint32_t use_payload;      // send packets with sequential payloads
 } injector_conf_t;
 
 injector_conf_t icfg;        // injector configuration in SDRAM
@@ -66,6 +67,9 @@ uint32_t nkeys;              // number of packet routing key
 uint32_t * pkt_keys;          // packet routing keys
 
 uint32_t injected_pkts = 0;  // keep a count of injected packets
+
+uint32_t send_pld;           // use packets with payload
+uint32_t payload = 0;        // sequential payload value
 
 uint32_t start_time;         // time to start packet injection
 uint32_t stop_time;          // time to stop packet injection
@@ -109,7 +113,7 @@ uint cfg_init (void) {
   address_t rca = data_specification_get_region (ROUTING, data);
 
   // initialise routing variables from SDRAM
-  routing_conf_t * rcfg = (routing_conf_t const *) rca;
+  routing_conf_t * rcfg = (routing_conf_t *) rca;
 
   // number of routing keys
   nkeys = rcfg->nkeys;
@@ -147,6 +151,8 @@ uint test_init () {
   stop_time = start_time + icfg.active_time;
 
   end_time = stop_time + icfg.idle_end;
+
+  send_pld = icfg.use_payload;
 
   // initialise router
   // -----------------------------
@@ -214,12 +220,18 @@ void inject_pkts (uint null0, uint null1) {
         continue;
       }
 
+      // if requested write payload and update for next packet
+      if (send_pld) {
+        cc[CC_TXDATA] = payload++;
+      }
+
       // fire packet,
       cc[CC_TXKEY] = pkt_keys[k];
       injected_pkts++;
 
       // and apply throttle control
       for (uint i = 0; i < icfg.throttle; i++) {
+        //NOTE: make sure that the loop is kept by the compiler
         __asm__ __volatile__("");
       }
     }

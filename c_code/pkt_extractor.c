@@ -45,15 +45,19 @@ static uint32_t time;
 // ------------------------------------------------------------------------
 // packet extractor configuration - populated in SDRAM by host
 typedef struct extractor_conf {
-  uint32_t throttle;         // extraction slow down
-  uint32_t active_time;      // length of time for packet extraction
+  uint32_t throttle;             // extraction slow down
+  uint32_t active_time;          // length of time for packet extraction
 } extractor_conf_t;
 
-extractor_conf_t ecfg;       // extractor configuration in SDRAM
+extractor_conf_t ecfg;           // extractor configuration in SDRAM
 
-uint32_t extracted_pkts = 0; // keep a count of extracted packets
+uint32_t extracted_pkts = 0;     // keep a count of extracted packets
 
-uint32_t end_time;           // time to end the test
+uint32_t expected_pld = 0;       // expected payload (when used)
+uint32_t missing_plds = 0;       // missing payload counter
+uint32_t last_pld = 0xffffffff;  // last payload received (when used)
+
+uint32_t end_time;               // time to end the test
 // ------------------------------------------------------------------------
 
 
@@ -124,6 +128,8 @@ void done (uint ec) {
   {
     case TEST_SUCC:
       io_printf (IO_BUF, "extracted packets: %u\n", extracted_pkts);
+      io_printf (IO_BUF, "last payload rcvd: %u\n", last_pld);
+      io_printf (IO_BUF, "missing payloads: %u\n", missing_plds);
       io_printf (IO_BUF, "test OK\n");
       break;
 
@@ -163,7 +169,7 @@ void extract_packet (uint key, uint payload)
   (void) key;
   (void) payload;
 
-  // count packets,
+  // count packet,
   extracted_pkts++;
 
   // and apply throttle control
@@ -171,8 +177,37 @@ void extract_packet (uint key, uint payload)
     __asm__ __volatile__("");
   }
 }
+// ------------------------------------------------------------------------
 
 
+// ------------------------------------------------------------------------
+// extract packets at a throttled pace
+// ------------------------------------------------------------------------
+void extract_packet_with_pld (uint key, uint payload)
+{
+  (void) key;
+
+  // check payload and report issues
+  uint32_t diff = payload - expected_pld;
+
+  if (diff != 0) {
+    missing_plds += (diff > 0) ? diff : -diff;
+  }
+
+  // remember last payload received
+  last_pld = payload;
+
+  // update expected payload to the correct value
+  expected_pld = payload + 1;
+
+  // count packet,
+  extracted_pkts++;
+
+  // and apply throttle control
+  for (uint i = 0; i < ecfg.throttle; i++) {
+    __asm__ __volatile__("");
+  }
+}
 // ------------------------------------------------------------------------
 
 
@@ -226,7 +261,7 @@ void c_main () {
   // register callbacks,
   spin1_callback_on (TIMER_TICK, time_control, TIMER_PRIORITY);
   spin1_callback_on (MC_PACKET_RECEIVED, extract_packet, EXTRACT_PRIOTITY);
-  spin1_callback_on (MCPL_PACKET_RECEIVED, extract_packet, EXTRACT_PRIOTITY);
+  spin1_callback_on (MCPL_PACKET_RECEIVED, extract_packet_with_pld, EXTRACT_PRIOTITY);
 
   // setup simulation engine,
 //lap  simulation_set_start_function (test_start);

@@ -39,9 +39,10 @@ class Pkt_Injector_Vertex(
 
     def __init__(self,
                  iid = 0,
-                 x_coord = None,
-                 y_coord = None,
-                 nkeys = 1
+                 x_coord  = None,
+                 y_coord  = None,
+                 nkeys    = 1,
+                 throttle = 0
                  ):
 
         label = f"pi/{iid}"
@@ -75,6 +76,9 @@ class Pkt_Injector_Vertex(
             for k in range (self.NKEYS):
                 self.inj_lnk.append (f"inj_link{x_coord}-{y_coord}/{iid}/{k}")
 
+        # number of routing keys to be used
+        self.throttle = throttle
+
         # size of configuration structure in SDRAM
         self.CONFIGURATION_BYTES = len (self.config)
 
@@ -99,21 +103,24 @@ class Pkt_Injector_Vertex(
               uint32_t active_time;    // length of time for packet sending
               uint32_t delayed_start;  // delay the start of packet sending
               uint32_t idle_end;       // idle time after packet sending stops
+              uint32_t use_payload;      // send packets with sequential payloads
             } injector_conf_t;
 
             pack: standard sizes, little-endian byte order,
             explicit padding
         """
-        throttle      = 0
         active_time   = 5
         delayed_start = 2
         idle_end      = 3
 
-        return struct.pack ("<4I",
-                            throttle,
+        use_payload   = 1
+
+        return struct.pack ("<5I",
+                            self.throttle,
                             active_time,
                             delayed_start,
-                            idle_end
+                            idle_end,
+                            use_payload
                             )
 
     @property
