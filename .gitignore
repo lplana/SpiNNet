@@ -1,6 +1,8 @@
 .*
 !.gitignore
 *~
+check_out
+
 *.a
 *.aplx
 *.aux
@@ -13,6 +15,7 @@
 *.gas
 *.log
 *.o
+*.ods
 *.out
 *.pdf
 *.pyc
