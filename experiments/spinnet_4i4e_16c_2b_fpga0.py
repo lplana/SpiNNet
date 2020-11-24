@@ -35,40 +35,43 @@ gfe.setup(
 
 # create connections along the border
 for n in range(NUM_CHIPS):
+    # inside chip coordinates
+    (xin, yin) = INSIDE_CHIPS[n]
+
+    # outside chip coordinates
+    (xout, yout) = OUTSIDE_CHIPS[n]
+
     for i in range(NUM_INJECTORS):
         # instantiate inside-out injector vertex
-        (xi, yi) = INSIDE_CHIPS[n]
-
         iv = Pkt_Injector_Vertex(
-            x_coord  = xi,
-            y_coord  = yi,
+            x_coord  = xin,
+            y_coord  = yin,
             throttle = INSIDE_INJECTOR_THROTTLE[n]
             )
-
         gfe.add_machine_vertex_instance(iv)
 
         # instantiate inside-out extractor vertex
-        (xe, ye) = OUTSIDE_CHIPS[n]
-        ev = Pkt_Extractor_Vertex(x_coord = xe, y_coord = ye)
+        ev = Pkt_Extractor_Vertex(
+            x_coord = xout,
+            y_coord = yout
+            )
         gfe.add_machine_vertex_instance(ev)
 
         # create link from injector to extractor
         gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
 
         # instantiate outside-in injector vertex
-        (xi, yi) = OUTSIDE_CHIPS[n]
-
         iv = Pkt_Injector_Vertex(
-            x_coord  = xi,
-            y_coord  = yi,
+            x_coord  = xout,
+            y_coord  = yout,
             throttle = OUTSIDE_INJECTOR_THROTTLE[n]
             )
-
         gfe.add_machine_vertex_instance(iv)
 
         # instantiate outside-in extractor vertex
-        (xe, ye) = INSIDE_CHIPS[n]
-        ev = Pkt_Extractor_Vertex(x_coord = xe, y_coord = ye)
+        ev = Pkt_Extractor_Vertex(
+            x_coord = xin,
+            y_coord = yin)
         gfe.add_machine_vertex_instance(ev)
 
         # create link from injector to extractor
