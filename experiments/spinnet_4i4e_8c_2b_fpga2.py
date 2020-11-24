@@ -8,12 +8,6 @@ from pkt_injector_vertex import Pkt_Injector_Vertex
 from pkt_extractor_vertex import Pkt_Extractor_Vertex
 
 
-# throttle injectors to avoid dropped packets
-OUTSIDE_INJECTOR_THROTTLE = [46, 47, 48, 47, 46, 47, 47, 47]
-INSIDE_INJECTOR_THROTTLE  = [46, 47, 48, 47, 46, 47, 47, 47]
-#UTSIDE_INJECTOR_THROTTLE = [47, 47, 47, 47, 47, 47, 47, 47]
-#NSIDE_INJECTOR_THROTTLE  = [47, 47, 47, 47, 47, 47, 47, 47]
-
 # number of chips to connect
 NUM_CHIPS = 8
 
@@ -27,6 +21,12 @@ OUTSIDE_CHIPS = [(5, 8), (6, 8), (7, 8), (8, 8),
 # chips on board border connected to FPGA2
 INSIDE_CHIPS = [(4, 7), (5, 7), (6, 7), (7, 7),
          (7, 6), (7, 5), (7, 4), (7, 3)]
+
+# throttle injectors to avoid dropped packets
+OUTSIDE_INJECTOR_THROTTLE = [46, 47, 48, 47, 46, 47, 47, 47]
+INSIDE_INJECTOR_THROTTLE  = [46, 47, 48, 47, 46, 47, 47, 47]
+#UTSIDE_INJECTOR_THROTTLE = [47, 47, 47, 47, 47, 47, 47, 47]
+#NSIDE_INJECTOR_THROTTLE  = [47, 47, 47, 47, 47, 47, 47, 47]
 
 # make sure to get two neighbouring boards across FPGA2
 gfe.setup(
