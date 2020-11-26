@@ -9,22 +9,20 @@ from pkt_extractor_vertex import Pkt_Extractor_Vertex
 
 
 # number of chips to connect
-NUM_CHIPS = 8
+NUM_CHIPS = 2
 
 # number of injectors per chip
 NUM_INJECTORS = 4
 
 # chips on board border connected to FPGA2
-INSIDE_CHIPS  = [(4, 8), (5, 8), (6, 8), (7, 8), (8, 8), (9, 9), (10, 10), (11, 11)]
+INSIDE_CHIPS  = [(4, 8), (5, 8)]
 
 # chips on neighbouring board across FPGA2 (using SpiNNaker link 1)
-OUTSIDE_CHIPS = [(4, 7), (5, 7), (6, 7), (7, 7), (8, 7), (9, 8), (10, 9), (11, 10)]
+OUTSIDE_CHIPS = [(4, 7), (5, 7)]
 
 # throttle injectors to avoid dropped packets
-#OUTSIDE_INJECTOR_THROTTLE = [46, 47, 48, 47, 46, 47, 47, 47]
-#INSIDE_INJECTOR_THROTTLE  = [46, 47, 48, 47, 46, 47, 47, 47]
-OUTSIDE_INJECTOR_THROTTLE = [64, 64, 64, 64, 64, 64, 64, 64]
-INSIDE_INJECTOR_THROTTLE  = [64, 64, 64, 64, 64, 64, 64, 64]
+OUTSIDE_INJECTOR_THROTTLE = [56, 56]
+INSIDE_INJECTOR_THROTTLE  = [56, 56]
 
 # make sure to get two neighbouring boards across FPGA2
 gfe.setup(
@@ -35,28 +33,30 @@ gfe.setup(
 
 # create connections along the border
 for n in range(NUM_CHIPS):
-    # inside chip coordinates
-    (xin, yin) = INSIDE_CHIPS[n]
+    # inside chip coordinates and parameters
+    (xin, yin)  = INSIDE_CHIPS[n]
+    throttle_in = INSIDE_INJECTOR_THROTTLE[n]
 
-    # outside chip coordinates
+    # outside chip coordinates and parameters
     (xout, yout) = OUTSIDE_CHIPS[n]
+    throttle_out = OUTSIDE_INJECTOR_THROTTLE[n]
 
     for i in range(NUM_INJECTORS):
         # instantiate inside-out injector vertex
         iv = Pkt_Injector_Vertex(
             x_coord  = xin,
             y_coord  = yin,
-            throttle = INSIDE_INJECTOR_THROTTLE[n]
+            throttle = throttle_in
             )
         gfe.add_machine_vertex_instance(iv)
-
+ 
         # instantiate inside-out extractor vertex
         ev = Pkt_Extractor_Vertex(
             x_coord = xout,
             y_coord = yout
             )
         gfe.add_machine_vertex_instance(ev)
-
+ 
         # create link from injector to extractor
         gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
 
@@ -64,16 +64,16 @@ for n in range(NUM_CHIPS):
         iv = Pkt_Injector_Vertex(
             x_coord  = xout,
             y_coord  = yout,
-            throttle = OUTSIDE_INJECTOR_THROTTLE[n]
+            throttle = throttle_out
             )
         gfe.add_machine_vertex_instance(iv)
-
+ 
         # instantiate outside-in extractor vertex
         ev = Pkt_Extractor_Vertex(
             x_coord = xin,
             y_coord = yin)
         gfe.add_machine_vertex_instance(ev)
-
+ 
         # create link from injector to extractor
         gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
 
@@ -81,7 +81,7 @@ for n in range(NUM_CHIPS):
 gfe.run(10000)
 
 # pause to allow external debugging
-#input ("experiment paused: press enter to continue")
+input ("experiment paused: press enter to continue")
 
 # finish
 gfe.stop()
