@@ -20,10 +20,14 @@ USE_PAYLOADS = True
 
 # test two connected FPGAs
 FX = 0
-FY = 2
+FY = 1
 
 if FX == FY:
     sys.exit (f"error: cannot test FPGA{FX} on its own")
+elif FX > FY:
+    tmp = FY
+    FY  = FX
+    FX  = tmp
 
 # define FX and FY chips on experiment
 if FX == 0:
