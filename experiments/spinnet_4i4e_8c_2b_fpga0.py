@@ -15,6 +15,9 @@ NUM_CONNECTIONS = 8
 # number of injectors per connection
 NUM_INJECTORS_PER_CONNECTION = 4
 
+# use payloads to verify arrival of all packets
+USE_PAYLOADS = True
+
 # test southward connections (SpiNNaker link 5)
 TEST_S = 1
 
@@ -64,13 +67,13 @@ else:
 # throttle injectors to avoid dropped packets
 #NOTE: [master_1.0.0]    [46] 3802278 - no NAKs
 #NOTE: [master_SA_1.0.1] [46] 3802278 - no NAKs
-INSIDE_INJECTOR_THROTTLE  = [22, 22, 22, 22, 22, 22, 22, 22]
+INSIDE_INJECTOR_THROTTLE  = [8, 8, 8, 8, 8, 8, 8, 8]
 
 #NOTE: [master_1.0.0]    [54] 3300327 - no NAKs
 #NOTE: [master_SA_1.0.1] [54] 3300327 - no NAKs
 #NOTE: [master_1.0.0]    [48] (3409224, 3409237) 2727363 NAKs/38 dropped
 #NOTE: [master_SA_1.0.1] [48] (3348700, 3409284) 2697373 NAKs/10982 dropped
-OUTSIDE_INJECTOR_THROTTLE = [22, 22, 22, 22, 22, 22, 22, 22]
+OUTSIDE_INJECTOR_THROTTLE = [8, 8, 8, 8, 8, 8, 8, 8]
 
 # make sure to get two neighbouring boards across FPGA2
 gfe.setup(
@@ -94,7 +97,7 @@ for n in range(NUM_CONNECTIONS):
                 x_coord     = xin,
                 y_coord     = yin,
                 throttle    = INSIDE_INJECTOR_THROTTLE[n],
-                use_payload = False
+                use_payload = USE_PAYLOADS
                 )
             gfe.add_machine_vertex_instance(iv)
 
@@ -114,7 +117,7 @@ for n in range(NUM_CONNECTIONS):
                 x_coord  = xout,
                 y_coord  = yout,
                 throttle = OUTSIDE_INJECTOR_THROTTLE[n],
-                use_payload = False
+                use_payload = USE_PAYLOADS
                 )
             gfe.add_machine_vertex_instance(iv)
 
