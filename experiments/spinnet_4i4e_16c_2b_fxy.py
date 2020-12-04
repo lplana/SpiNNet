@@ -9,6 +9,9 @@ from pkt_injector_vertex import Pkt_Injector_Vertex
 from pkt_extractor_vertex import Pkt_Extractor_Vertex
 
 
+# Send packets in both directions (FX -> FY and FY -> FX)
+BIDIRECTIONAL = True
+
 # number of connections to test
 NUM_CONNECTIONS = 8
 
@@ -20,7 +23,7 @@ USE_PAYLOADS = True
 
 # test two connected FPGAs
 FX = 0
-FY = 1
+FY = 2
 
 if FX == FY:
     sys.exit (f"error: cannot test FPGA{FX} on its own")
@@ -43,15 +46,13 @@ else:
     FY_CHIPS = [(7, 4), (7, 5), (7, 6), (7, 7), (7, 3), (7, 4), (7, 5), (7, 6)]
 
 # throttle injectors to avoid dropped packets
-#NOTE: [master_1.0.0]    [46] 3802278 - no NAKs
-#NOTE: [master_SA_1.0.1] [46] 3802278 - no NAKs
-FX_INJECTOR_THROTTLE  = [8, 8, 8, 8, 8, 8, 8, 8]
-
-#NOTE: [master_1.0.0]    [54] 3300327 - no NAKs
-#NOTE: [master_SA_1.0.1] [54] 3300327 - no NAKs
-#NOTE: [master_1.0.0]    [48] (3409224, 3409237) 2727363 NAKs/38 dropped
-#NOTE: [master_SA_1.0.1] [48] (3348700, 3409284) 2697373 NAKs/10982 dropped
-FY_INJECTOR_THROTTLE = [8, 8, 8, 8, 8, 8, 8, 8]
+if BIDIRECTIONAL:
+    #NOTE: 53 [MPS_QIO_F8_1.0.1] no NAKs
+    FX_INJECTOR_THROTTLE  = [52, 52, 52, 52, 52, 52, 52, 52]
+    FY_INJECTOR_THROTTLE = [52, 52, 52, 52, 52, 52, 52, 52]
+else:
+    #NOTE: 48 [MPS_QIO_F8_1.0.1] no NAKs PLD CON=4
+    FX_INJECTOR_THROTTLE  = [48, 48, 48, 48, 48, 48, 48, 48]
 
 # make sure to get two neighbouring boards across FPGA2
 gfe.setup(
@@ -88,23 +89,25 @@ for n in range(NUM_CONNECTIONS):
         # create link from injector to extractor
         gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
 
-        # instantiate FY injector vertex
-        iv = Pkt_Injector_Vertex(
-            x_coord  = xy,
-            y_coord  = yy,
-            throttle = FY_INJECTOR_THROTTLE[n],
-            use_payload = USE_PAYLOADS
-            )
-        gfe.add_machine_vertex_instance(iv)
+        if BIDIRECTIONAL:
+            # instantiate FY injector vertex
+            iv = Pkt_Injector_Vertex(
+                x_coord  = xy,
+                y_coord  = yy,
+                throttle = FY_INJECTOR_THROTTLE[n],
+                use_payload = USE_PAYLOADS
+                )
+            gfe.add_machine_vertex_instance(iv)
 
-        # instantiate FX extractor vertex
-        ev = Pkt_Extractor_Vertex(
-            x_coord = xx,
-            y_coord = yx)
-        gfe.add_machine_vertex_instance(ev)
+            # instantiate FX extractor vertex
+            ev = Pkt_Extractor_Vertex(
+                x_coord = xx,
+                y_coord = yx
+                )
+            gfe.add_machine_vertex_instance(ev)
 
-        # create link from injector to extractor
-        gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
+            # create link from injector to extractor
+            gfe.add_machine_edge_instance(MachineEdge (iv, ev), iv.inj_lnk)
 
 # run experiment
 gfe.run(10000)
