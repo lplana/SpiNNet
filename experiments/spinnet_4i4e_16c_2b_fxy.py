@@ -47,14 +47,16 @@ else:
 
 # throttle injectors to avoid dropped packets
 if BIDIRECTIONAL:
-    #NOTE: 53 [MPS_QIO_F8_1.0.1] no NAKs
-    FX_INJECTOR_THROTTLE  = [52, 52, 52, 52, 52, 52, 52, 52]
-    FY_INJECTOR_THROTTLE = [52, 52, 52, 52, 52, 52, 52, 52]
+    #NOTE: 53 [SPIN5_MPS_QIO_F8_1.0.1] no NAKs
+    #NOTE: 54 [SPREAD_QIO_F8_1.0.2] no NAKs -payloads
+    #NOTE: 24 [SPREAD_QIO_F8_1.0.2] no NAKs -no payloads
+    FX_INJECTOR_THROTTLE  = [53, 53, 53, 53, 53, 53, 53, 53]
+    FY_INJECTOR_THROTTLE = [53, 53, 53, 53, 53, 53, 53, 53]
 else:
     #NOTE: 48 [MPS_QIO_F8_1.0.1] no NAKs PLD CON=4
     FX_INJECTOR_THROTTLE  = [48, 48, 48, 48, 48, 48, 48, 48]
 
-# make sure to get two neighbouring boards across FPGA2
+# get three neighbouring boards
 gfe.setup(
     machine_time_step   = 1000000,
     n_boards_required   = 3,
